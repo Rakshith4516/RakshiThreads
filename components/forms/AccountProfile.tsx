@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +20,9 @@ import * as z from "zod"
 import Image from 'next/image';
 import { ChangeEvent, useState } from 'react';
 import { isBase64Image } from '@/lib/utils';
-import { useUploadThing } from '@/lib/validations/uploadthing';
+import { useUploadThing } from '@/lib/uploadthing';
+import { updateUser } from '@/lib/actions/user.actions';
+import {usePathname, useRouter} from 'next/navigation';
 
 
 interface Props{
@@ -38,6 +41,8 @@ const AccountProfile =({user, btnTitle}: Props)=>{
 
 const [files, setFiles] = useState<File[]>([])
 const{ startUpload} = useUploadThing("media");
+const router=useRouter();
+const pathname=usePathname();
 
     const form= useForm({
         resolver:zodResolver(UserValidation),
@@ -83,7 +88,21 @@ const{ startUpload} = useUploadThing("media");
 
        }
 
-       //TODO update user profile
+       await updateUser({
+        userId:user.id,
+        username: values.username,
+        name:values.name,
+        bio: values.bio,
+        image: values.profile_photo,
+        path:pathname,
+       });
+       
+       if(pathname === '/profile/edit'){
+        router.back();
+       }else{
+        router.push('/');
+       }
+    
       }
       
     return(
@@ -122,7 +141,7 @@ const{ startUpload} = useUploadThing("media");
                   onChange={(e)=> handleImage(e,field.onChange)}
                    />
                 </FormControl>
-                
+                <FormMessage/>
               </FormItem>
             )}
           />
@@ -142,7 +161,7 @@ const{ startUpload} = useUploadThing("media");
                   {...field}
                    />
                 </FormControl>
-                
+                <FormMessage/>
               </FormItem>
             )}
           />
@@ -161,7 +180,7 @@ const{ startUpload} = useUploadThing("media");
                   {...field}
                    />
                 </FormControl>
-                
+                <FormMessage/>
               </FormItem>
             )}
           />
@@ -180,7 +199,7 @@ const{ startUpload} = useUploadThing("media");
                   {...field}
                    />
                 </FormControl>
-                
+                <FormMessage/>
               </FormItem>
             )}
           />
